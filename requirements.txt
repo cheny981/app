@@ -1,0 +1,89 @@
+从烧瓶导入烧瓶，请求
+从日期时间导入日期时间
+导入json
+导入操作系统
+
+app=烧瓶(__name__)
+
+log_FILE="visitors.json"
+
+
+定义get_ip()：
+    # 获取与服务器直接连接的客户端 IP
+return request.remote_addr或“未知”
+
+
+Def save_visit(ip)：
+访问次数=[]
+
+如果存在os.path.(LOG_FILE)：
+尝试：
+将(LOG_FILE，"r"，编码="utf-8")作为f打开：
+visits=json.load(f)
+except(json.JSONDecodeError，OSError)：
+访问次数=[]
+
+visits.append({
+“ip”：ip，
+“time”：日期时间。现在()。strftime("%Y-%m-%d%H：%M：%S")
+})
+
+将(LOG_FILE，"w"，编码="utf-8")作为f打开：
+JSON.dump(visits，f，确保_ascii=False，缩进=2)
+
+
+@app.route("/")
+Def home()：
+IP=get_ip()
+    save_visit(ip)
+
+return f"""
+<！doctype html>
+    <html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>IP査询</title>
+</head>
+<body>
+<h1>你的IP地址</h1>
+<p>{ip}</p>
+        <p>本网站会记录访问 IP 和访问时间。</p>
+</body>
+</html>
+    """
+
+
+@app.route("/admin")
+Def管理员()：
+    # 本地演示版本：仅允许从本机查看记录
+如果request.remote_addr不在("127.0.0.1"，"：：1")中：
+return"禁止访问"，403
+
+尝试：
+将(LOG_FILE，"r"，编码="utf-8")作为f打开：
+visits=json.load(f)
+except(FileNotFoundError，json.JSONDecodeError，OSError)：
+访问次数=[]
+
+rows="".join(
+F"<tr><td>{v['time']}</td><td>{v['ip']}</td></tr>"
+访问中的V
+    )
+
+return f"""
+<！doctype html>
+    <html lang="zh-CN">
+<head><meta charset="UTF-8"><title>访问记录</title></head>
+<body>
+<h1>网站访问记录</h1>
+<table border="1"cellpadding="8">
+<tr><th>访问时间</th><th>IP地址</th></tr>
+{rows}
+</table>
+</body>
+</html>
+    """
+
+
+如果__名称__=="__主要的__"：
+App.run(debug=False)
